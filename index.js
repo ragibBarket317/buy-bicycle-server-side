@@ -20,12 +20,43 @@ async function run() {
         await client.connect();
         const database = client.db('buy_bycycle');
         const cycleCollection = database.collection('cycles');
+        const purchaseCollection = database.collection('purchase');
+        const usersCollection = database.collection('users');
 
         //Get Cycles
         app.get('/cycles', async (req, res) => {
             const cursor = cycleCollection.find({});
             const cycles = await cursor.toArray();
             res.send(cycles);
+        });
+        //Get Purchases
+        app.get('/purchase', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const cursor = purchaseCollection.find(query);
+            const purchase = await cursor.toArray();
+            res.send(purchase);
+        });
+        // Find One id
+        app.get('/cycles/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const user = await cycleCollection.findOne(query);
+            res.send(user);
+        });
+        // POST Purchase API
+        app.post('/purchase', async (req, res) => {
+            const newUser = req.body;
+            const result = await purchaseCollection.insertOne(newUser)
+            console.log('hitting the server', newUser)
+            res.json(result);
+        });
+        // POST User API
+        app.post('/users', async (req, res) => {
+            const newUser = req.body;
+            const result = await usersCollection.insertOne(newUser)
+            console.log('hitting the server', newUser)
+            res.json(result);
         });
 
     }
