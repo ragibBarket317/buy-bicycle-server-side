@@ -22,6 +22,7 @@ async function run() {
         const cycleCollection = database.collection('cycles');
         const purchaseCollection = database.collection('purchase');
         const usersCollection = database.collection('users');
+        const reviewCollection = database.collection('review');
 
         //Get Cycles
         app.get('/cycles', async (req, res) => {
@@ -29,10 +30,19 @@ async function run() {
             const cycles = await cursor.toArray();
             res.send(cycles);
         });
-        //Get Purchases
+        app.get('/review', async (req, res) => {
+            const cursor = reviewCollection.find({});
+            const review = await cursor.toArray();
+            res.send(review);
+        });
+
         app.get('/purchase', async (req, res) => {
+            let query = {};
             const email = req.query.email;
-            const query = { email: email };
+            console.log(email)
+            if (email) {
+                query = { email: email }
+            }
             const cursor = purchaseCollection.find(query);
             const purchase = await cursor.toArray();
             res.send(purchase);
@@ -44,6 +54,17 @@ async function run() {
             const user = await cycleCollection.findOne(query);
             res.send(user);
         });
+        // Cheack Admin
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            let isAdmin = false;
+            if (user?.role === 'admin') {
+                isAdmin = true;
+            }
+            res.json({ admin: isAdmin });
+        });
         // POST Purchase API
         app.post('/purchase', async (req, res) => {
             const newUser = req.body;
@@ -51,13 +72,57 @@ async function run() {
             console.log('hitting the server', newUser)
             res.json(result);
         });
+        // POST Cycle API
+        app.post('/cycles', async (req, res) => {
+            const newUser = req.body;
+            const result = await cycleCollection.insertOne(newUser)
+            console.log('hitting the server', newUser)
+            res.json(result);
+        });
         // POST User API
         app.post('/users', async (req, res) => {
             const newUser = req.body;
             const result = await usersCollection.insertOne(newUser)
-            console.log('hitting the server', newUser)
             res.json(result);
         });
+        app.post('/review', async (req, res) => {
+            const newUser = req.body;
+            const result = await reviewCollection.insertOne(newUser)
+            res.json(result);
+        });
+        // DELETE API
+        app.delete('/purchase/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await purchaseCollection.deleteOne(query);
+            console.log('deleting user id', id);
+            res.json(result);
+        })
+        // DELETE API
+        app.delete('/cycles/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await cycleCollection.deleteOne(query);
+            console.log('deleting user id', id);
+            res.json(result);
+        })
+        //Put User Api
+        app.put('/users', async (req, res) => {
+            const user = req.body;
+            const filter = { email: user.email };
+            const options = { upsert: true };
+            const updateDoc = { $set: user };
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
+            res.json(result);
+        })
+        //Admin api
+        app.put('/users/admin', async (req, res) => {
+            const user = req.body;
+            const filter = { email: user.email };
+            const updateDoc = { $set: { role: "admin" } };
+            const result = await usersCollection.updateOne(filter, updateDoc);
+            res.json(result);
+        })
 
     }
     finally {
