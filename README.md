@@ -1,8 +1,11 @@
 # Getting Started with Buy Bycycle
 
 This is my website [Buy Bycycle](https://buy-bycycle.web.app/).
-In this site, client buy a cycle . It is a single page application. This wesite has home page, product page , buy now page , user dashboard & admine dashboard.
-Admin easliy manage this website .
+
+## Project Summary
+* This project is a full-stack responsive single-page web app of professional services, authorization for user & admin panel.
+* Created different dashboard based on user or admin. Client can place an order see details and give reviews.
+* Admin can appoint new admin, add services, manage all orders  and delete services.
 
 ## In this website i can use-
 * Node js for backend server.
